@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slide Master - Puzzle Game</title>
+    <title>Slide Master Pro - Advanced Puzzle Game</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,17 +16,18 @@
 
         body {
             font-family: 'Open Sans', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
+            color: #f1f5f9;
         }
 
         .game-container {
-            max-width: 400px;
+            max-width: 420px;
             margin: 0 auto;
             padding: 16px;
             height: 100vh;
@@ -34,22 +35,25 @@
             flex-direction: column;
         }
 
-        /* Top Bar */
+        /* Enhanced top bar with timer and difficulty selector */
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            backdrop-filter: blur(10px);
         }
 
         .back-btn {
             width: 40px;
             height: 40px;
             border: none;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -58,28 +62,74 @@
         }
 
         .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .game-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         }
 
         .level-title {
             font-family: 'Montserrat', sans-serif;
             font-weight: 600;
-            font-size: 18px;
-            color: #334155;
+            font-size: 16px;
+            color: #f1f5f9;
+        }
+
+        .timer-display {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
         }
 
         .score-display {
-            background: #2563eb;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
             font-size: 14px;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            color: #94a3b8;
+            font-weight: 500;
         }
 
-        /* Game Board */
+        /* Added settings button */
+        .settings-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced progress bar with theme colors */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Dynamic game board that adapts to different grid sizes */
         .game-board {
             flex: 1;
             display: flex;
@@ -89,39 +139,61 @@
         }
 
         .puzzle-grid {
-            width: 320px;
-            height: 320px;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            padding: 12px;
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 8px;
-            position: relative;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
+        .puzzle-grid.size-3 {
+            grid-template-columns: repeat(3, 1fr);
+            width: 280px;
+            height: 280px;
+        }
+
+        .puzzle-grid.size-4 {
+            grid-template-columns: repeat(4, 1fr);
+            width: 320px;
+            height: 320px;
+        }
+
+        .puzzle-grid.size-5 {
+            grid-template-columns: repeat(5, 1fr);
+            width: 350px;
+            height: 350px;
+        }
+
+        .puzzle-grid.size-6 {
+            grid-template-columns: repeat(6, 1fr);
+            width: 360px;
+            height: 360px;
+        }
+
+        /* Enhanced tiles with image support and better animations */
         .tile {
-            background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-            border-radius: 12px;
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Montserrat', sans-serif;
-            font-weight: 900;
-            font-size: 24px;
-            color: white;
+            font-weight: 600;
+            color: #1e293b;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             position: relative;
             overflow: hidden;
+            background-size: cover;
+            background-position: center;
         }
 
         .tile:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
         }
 
         .tile.empty {
@@ -130,92 +202,100 @@
             cursor: default;
         }
 
-        .tile.empty:hover {
-            transform: none;
+        .tile.hint {
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
         }
 
         .tile.moving {
+            transform: scale(0.95);
             z-index: 10;
         }
 
-        /* Bottom Controls */
+        .tile-number {
+            font-size: 18px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            position: relative;
+        }
+
+        .size-3 .tile-number { font-size: 24px; }
+        .size-5 .tile-number { font-size: 14px; }
+        .size-6 .tile-number { font-size: 12px; }
+
+        /* Enhanced control buttons with new features */
         .bottom-controls {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .control-btn {
-            flex: 1;
-            padding: 16px;
+            padding: 12px 8px;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             font-family: 'Open Sans', sans-serif;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: 500;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            gap: 4px;
+            min-height: 60px;
         }
 
         .primary-btn {
-            background: #2563eb;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .primary-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
         .secondary-btn {
-            background: #ffffff;
-            color: #334155;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .danger-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         }
 
-        /* Progress Bar */
-        .progress-container {
-            background: #e2e8f0;
-            height: 6px;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #0ea5e9, #2563eb);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-            width: 0%;
-        }
-
-        /* Win Modal */
+        /* Enhanced modals with better styling */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
         }
 
         .modal-overlay.show {
@@ -224,15 +304,16 @@
         }
 
         .modal {
-            background: white;
-            border-radius: 24px;
-            padding: 32px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 20px;
+            padding: 32px 24px;
+            max-width: 350px;
+            width: 90%;
             text-align: center;
-            max-width: 320px;
-            margin: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            transform: scale(0.8);
+            transform: scale(0.9);
             transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
 
         .modal-overlay.show .modal {
@@ -243,23 +324,27 @@
             font-family: 'Montserrat', sans-serif;
             font-weight: 900;
             font-size: 28px;
-            color: #2563eb;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .modal p {
-            color: #64748b;
+            color: #94a3b8;
             margin-bottom: 24px;
             font-size: 16px;
         }
 
         .stats {
-            display: flex;
-            justify-content: space-around;
-            margin: 24px 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
             padding: 20px;
-            background: #f8fafc;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
         }
 
         .stat {
@@ -268,27 +353,85 @@
 
         .stat-value {
             font-family: 'Montserrat', sans-serif;
-            font-weight: 900;
-            font-size: 24px;
-            color: #2563eb;
+            font-weight: 600;
+            font-size: 20px;
+            color: #f1f5f9;
+            margin-bottom: 4px;
         }
 
         .stat-label {
             font-size: 12px;
-            color: #64748b;
+            color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* Particles */
+        /* Settings modal styles */
+        .settings-grid {
+            display: grid;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        .setting-control select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #f1f5f9;
+            font-size: 14px;
+        }
+
+        .setting-control input[type="range"] {
+            width: 100px;
+        }
+
+        .theme-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .theme-option {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .theme-option.active {
+            border-color: #3b82f6;
+            transform: scale(1.05);
+        }
+
+        .theme-numbers { background: linear-gradient(135deg, #ffffff, #f1f5f9); }
+        .theme-colors { background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4); }
+        .theme-nature { background: linear-gradient(135deg, #2d5a27, #40a832, #7cb342, #8bc34a); }
+
+        /* Particle effects for celebrations */
         .particle {
             position: absolute;
             width: 6px;
             height: 6px;
-            background: #0ea5e9;
+            background: #3b82f6;
             border-radius: 50%;
             pointer-events: none;
-            animation: particle-float 1s ease-out forwards;
+            animation: particle-float 2s ease-out forwards;
         }
 
         @keyframes particle-float {
@@ -302,20 +445,46 @@
             }
         }
 
-        /* Responsive */
-        @media (max-width: 480px) {
-            .game-container {
-                padding: 12px;
-            }
-            
-            .puzzle-grid {
-                width: 280px;
-                height: 280px;
-            }
-            
-            .tile {
-                font-size: 20px;
-            }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Achievement notification */
+        .achievement {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .achievement.show {
+            transform: translateX(0);
+        }
+
+        .achievement-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .achievement-desc {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 380px) {
+            .puzzle-grid.size-4 { width: 280px; height: 280px; }
+            .puzzle-grid.size-5 { width: 300px; height: 300px; }
+            .puzzle-grid.size-6 { width: 320px; height: 320px; }
         }
     </style>
 </head>
@@ -324,14 +493,23 @@
         <!-- Top Bar -->
         <div class="top-bar">
             <button class="back-btn" onclick="goBack()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
             </button>
-            <div class="level-title">Level 1</div>
+            <div class="game-info">
+                <div class="level-title" id="levelTitle">Expert Mode</div>
+                <div class="timer-display" id="timerDisplay">0:00</div>
+            </div>
             <div class="score-display">
                 <span id="moves">0</span> moves
             </div>
+            <button class="settings-btn" onclick="openSettings()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+                </svg>
+            </button>
         </div>
 
         <!-- Progress Bar -->
@@ -341,7 +519,7 @@
 
         <!-- Game Board -->
         <div class="game-board">
-            <div class="puzzle-grid" id="puzzleGrid">
+            <div class="puzzle-grid size-4" id="puzzleGrid">
                 <!-- Tiles will be generated by JavaScript -->
             </div>
         </div>
@@ -366,7 +544,14 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
                 </svg>
-                Shuffle
+                New Game
+            </button>
+            <button class="control-btn danger-btn" onclick="resetGame()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1015 0 9 9 0 10-15 0"/>
+                    <path d="M12 7v5l3 3"/>
+                </svg>
+                Reset
             </button>
         </div>
     </div>
@@ -374,8 +559,8 @@
     <!-- Win Modal -->
     <div class="modal-overlay" id="winModal">
         <div class="modal">
-            <h2>Brilliant!</h2>
-            <p>You've outsmarted this puzzle!</p>
+            <h2>Outstanding!</h2>
+            <p>You've mastered this challenge!</p>
             <div class="stats">
                 <div class="stat">
                     <div class="stat-value" id="finalMoves">0</div>
@@ -385,9 +570,13 @@
                     <div class="stat-value" id="finalTime">0:00</div>
                     <div class="stat-label">Time</div>
                 </div>
+                <div class="stat">
+                    <div class="stat-value" id="finalScore">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
             </div>
             <button class="control-btn primary-btn" onclick="nextLevel()" style="width: 100%; margin-bottom: 12px;">
-                Next Level
+                Next Challenge
             </button>
             <button class="control-btn secondary-btn" onclick="playAgain()" style="width: 100%;">
                 Play Again
@@ -395,43 +584,123 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <h2>Game Settings</h2>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <span class="setting-label">Difficulty</span>
+                    <div class="setting-control">
+                        <select id="difficultySelect" onchange="changeDifficulty()">
+                            <option value="3">Easy (3×3)</option>
+                            <option value="4" selected>Normal (4×4)</option>
+                            <option value="5">Hard (5×5)</option>
+                            <option value="6">Expert (6×6)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Theme</span>
+                </div>
+                <div class="theme-selector">
+                    <div class="theme-option theme-numbers active" onclick="changeTheme('numbers')" data-theme="numbers"></div>
+                    <div class="theme-option theme-colors" onclick="changeTheme('colors')" data-theme="colors"></div>
+                    <div class="theme-option theme-nature" onclick="changeTheme('nature')" data-theme="nature"></div>
+                </div>
+                <div class="setting-item">
+                    <span class="setting-label">Sound Effects</span>
+                    <div class="setting-control">
+                        <input type="checkbox" id="soundToggle" checked onchange="toggleSound()">
+                    </div>
+                </div>
+            </div>
+            <button class="control-btn primary-btn" onclick="closeSettings()" style="width: 100%; margin-top: 20px;">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Achievement Notification -->
+    <div class="achievement" id="achievementNotification">
+        <div class="achievement-title" id="achievementTitle">Achievement Unlocked!</div>
+        <div class="achievement-desc" id="achievementDesc">First puzzle solved!</div>
+    </div>
+
     <script>
-        class SlidePuzzle {
+        class AdvancedSlidePuzzle {
             constructor() {
                 this.size = 4;
                 this.tiles = [];
-                this.emptyPos = { row: 3, col: 3 };
+                this.emptyPos = { row: this.size - 1, col: this.size - 1 };
                 this.moves = 0;
                 this.startTime = Date.now();
                 this.gameHistory = [];
                 this.isAnimating = false;
+                this.timer = null;
+                this.theme = 'numbers';
+                this.soundEnabled = true;
+                this.achievements = JSON.parse(localStorage.getItem('puzzleAchievements') || '[]');
+                this.bestScores = JSON.parse(localStorage.getItem('puzzleBestScores') || '{}');
                 
                 this.initGame();
                 this.render();
+                this.startTimer();
                 this.shufflePuzzle();
+                this.updateLevelTitle();
             }
 
             initGame() {
-                // Initialize solved state
+                this.tiles = [];
                 for (let i = 0; i < this.size * this.size - 1; i++) {
                     this.tiles.push(i + 1);
                 }
                 this.tiles.push(0); // Empty tile
+                this.emptyPos = { row: this.size - 1, col: this.size - 1 };
             }
 
             render() {
                 const grid = document.getElementById('puzzleGrid');
+                grid.className = `puzzle-grid size-${this.size}`;
                 grid.innerHTML = '';
 
                 for (let i = 0; i < this.size * this.size; i++) {
                     const tile = document.createElement('div');
                     tile.className = this.tiles[i] === 0 ? 'tile empty' : 'tile';
-                    tile.textContent = this.tiles[i] === 0 ? '' : this.tiles[i];
+                    
+                    if (this.tiles[i] !== 0) {
+                        const numberSpan = document.createElement('span');
+                        numberSpan.className = 'tile-number';
+                        numberSpan.textContent = this.tiles[i];
+                        tile.appendChild(numberSpan);
+                        
+                        // Apply theme
+                        this.applyTileTheme(tile, this.tiles[i]);
+                    }
+                    
                     tile.onclick = () => this.moveTile(i);
                     grid.appendChild(tile);
                 }
 
                 this.updateProgress();
+            }
+
+            applyTileTheme(tile, number) {
+                switch (this.theme) {
+                    case 'colors':
+                        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
+                        tile.style.background = colors[(number - 1) % colors.length];
+                        tile.querySelector('.tile-number').style.color = 'white';
+                        break;
+                    case 'nature':
+                        const natureColors = ['#2d5a27', '#40a832', '#7cb342', '#8bc34a', '#689f38', '#558b2f', '#33691e', '#1b5e20'];
+                        tile.style.background = natureColors[(number - 1) % natureColors.length];
+                        tile.querySelector('.tile-number').style.color = 'white';
+                        break;
+                    default:
+                        tile.style.background = 'linear-gradient(135deg, #ffffff, #f1f5f9)';
+                        tile.querySelector('.tile-number').style.color = '#1e293b';
+                }
             }
 
             moveTile(index) {
@@ -442,7 +711,6 @@
                 const emptyRow = this.emptyPos.row;
                 const emptyCol = this.emptyPos.col;
 
-                // Check if tile is adjacent to empty space
                 const isAdjacent = 
                     (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
                     (Math.abs(col - emptyCol) === 1 && row === emptyRow);
@@ -457,43 +725,144 @@
                 });
 
                 // Animate tile movement
-                this.animateTileMove(index, this.emptyPos.row * this.size + this.emptyPos.col);
-
-                // Swap tile with empty space
-                const emptyIndex = emptyRow * this.size + emptyCol;
-                [this.tiles[index], this.tiles[emptyIndex]] = [this.tiles[emptyIndex], this.tiles[index]];
-                this.emptyPos = { row, col };
-
-                this.moves++;
-                document.getElementById('moves').textContent = this.moves;
-
-                // Check win condition
-                setTimeout(() => {
-                    if (this.checkWin()) {
-                        this.showWinModal();
-                        this.createParticles();
-                    }
-                }, 300);
-            }
-
-            animateTileMove(fromIndex, toIndex) {
                 this.isAnimating = true;
-                const tiles = document.querySelectorAll('.tile');
-                const movingTile = tiles[fromIndex];
-                
-                movingTile.classList.add('moving');
-                
+                const tile = document.querySelectorAll('.tile')[index];
+                tile.classList.add('moving');
+
                 setTimeout(() => {
+                    // Perform the move
+                    const emptyIndex = emptyRow * this.size + emptyCol;
+                    [this.tiles[index], this.tiles[emptyIndex]] = [this.tiles[emptyIndex], this.tiles[index]];
+                    this.emptyPos = { row, col };
+                    this.moves++;
+
+                    document.getElementById('moves').textContent = this.moves;
                     this.render();
+                    this.playSound('move');
+
+                    if (this.isSolved()) {
+                        this.gameWon();
+                    }
+
                     this.isAnimating = false;
-                }, 300);
+                }, 150);
             }
 
-            checkWin() {
+            isSolved() {
                 for (let i = 0; i < this.size * this.size - 1; i++) {
                     if (this.tiles[i] !== i + 1) return false;
                 }
                 return this.tiles[this.size * this.size - 1] === 0;
+            }
+
+            gameWon() {
+                clearInterval(this.timer);
+                const endTime = Date.now();
+                const totalTime = Math.floor((endTime - this.startTime) / 1000);
+                const score = this.calculateScore(this.moves, totalTime);
+
+                // Update best scores
+                const key = `${this.size}x${this.size}`;
+                if (!this.bestScores[key] || score > this.bestScores[key].score) {
+                    this.bestScores[key] = { score, moves: this.moves, time: totalTime };
+                    localStorage.setItem('puzzleBestScores', JSON.stringify(this.bestScores));
+                }
+
+                // Check achievements
+                this.checkAchievements(this.moves, totalTime);
+
+                // Show win modal
+                document.getElementById('finalMoves').textContent = this.moves;
+                document.getElementById('finalTime').textContent = this.formatTime(totalTime);
+                document.getElementById('finalScore').textContent = score;
+                document.getElementById('winModal').classList.add('show');
+
+                // Create celebration particles
+                this.createParticles();
+                this.playSound('win');
+            }
+
+            calculateScore(moves, time) {
+                const baseScore = this.size * this.size * 1000;
+                const movesPenalty = moves * 10;
+                const timePenalty = time * 5;
+                return Math.max(100, baseScore - movesPenalty - timePenalty);
+            }
+
+            checkAchievements(moves, time) {
+                const achievements = [
+                    { id: 'first_win', title: 'First Victory!', desc: 'Solved your first puzzle', condition: () => true },
+                    { id: 'speed_demon', title: 'Speed Demon', desc: 'Solved in under 60 seconds', condition: () => time < 60 },
+                    { id: 'efficient', title: 'Efficiency Expert', desc: 'Solved with minimal moves', condition: () => moves < this.size * this.size * 2 },
+                    { id: 'master', title: 'Puzzle Master', desc: 'Solved 10 puzzles', condition: () => this.achievements.filter(a => a.id.includes('win')).length >= 10 }
+                ];
+
+                achievements.forEach(achievement => {
+                    if (!this.achievements.find(a => a.id === achievement.id) && achievement.condition()) {
+                        this.achievements.push(achievement);
+                        localStorage.setItem('puzzleAchievements', JSON.stringify(this.achievements));
+                        this.showAchievement(achievement);
+                    }
+                });
+            }
+
+            showAchievement(achievement) {
+                const notification = document.getElementById('achievementNotification');
+                document.getElementById('achievementTitle').textContent = achievement.title;
+                document.getElementById('achievementDesc').textContent = achievement.desc;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            createParticles() {
+                const colors = ['#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        particle.style.left = Math.random() * window.innerWidth + 'px';
+                        particle.style.top = Math.random() * window.innerHeight + 'px';
+                        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        document.body.appendChild(particle);
+                        
+                        setTimeout(() => particle.remove(), 2000);
+                    }, i * 100);
+                }
+            }
+
+            startTimer() {
+                this.timer = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
+                    document.getElementById('timerDisplay').textContent = this.formatTime(elapsed);
+                }, 1000);
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            updateProgress() {
+                let correctTiles = 0;
+                for (let i = 0; i < this.size * this.size - 1; i++) {
+                    if (this.tiles[i] === i + 1) correctTiles++;
+                }
+                const progress = (correctTiles / (this.size * this.size - 1)) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+            }
+
+            updateLevelTitle() {
+                const titles = {
+                    3: 'Beginner Mode',
+                    4: 'Normal Mode', 
+                    5: 'Advanced Mode',
+                    6: 'Expert Mode'
+                };
+                document.getElementById('levelTitle').textContent = titles[this.size];
             }
 
             shufflePuzzle() {
@@ -502,13 +871,15 @@
                 this.startTime = Date.now();
                 this.gameHistory = [];
                 document.getElementById('moves').textContent = '0';
+                
+                if (this.timer) clearInterval(this.timer);
+                this.startTimer();
 
                 // Perform random valid moves to shuffle
                 for (let i = 0; i < 1000; i++) {
                     const possibleMoves = this.getPossibleMoves();
                     const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
                     
-                    // Move without counting or saving history
                     const emptyIndex = this.emptyPos.row * this.size + this.emptyPos.col;
                     [this.tiles[randomMove], this.tiles[emptyIndex]] = [this.tiles[emptyIndex], this.tiles[randomMove]];
                     this.emptyPos = {
@@ -542,62 +913,80 @@
 
                 document.getElementById('moves').textContent = this.moves;
                 this.render();
+                this.playSound('undo');
             }
 
             getHint() {
                 const possibleMoves = this.getPossibleMoves();
                 if (possibleMoves.length === 0) return;
 
-                // Highlight a random possible move
-                const hintIndex = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-                const tiles = document.querySelectorAll('.tile');
-                const hintTile = tiles[hintIndex];
+                // Clear previous hints
+                document.querySelectorAll('.tile.hint').forEach(tile => {
+                    tile.classList.remove('hint');
+                });
 
-                hintTile.style.transform = 'scale(1.1)';
-                hintTile.style.boxShadow = '0 0 20px rgba(14, 165, 233, 0.8)';
+                // Highlight a random possible move
+                const hintMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                const tiles = document.querySelectorAll('.tile');
+                tiles[hintMove].classList.add('hint');
 
                 setTimeout(() => {
-                    hintTile.style.transform = '';
-                    hintTile.style.boxShadow = '';
-                }, 1000);
+                    tiles[hintMove].classList.remove('hint');
+                }, 2000);
+
+                this.playSound('hint');
             }
 
-            updateProgress() {
-                let correctTiles = 0;
-                for (let i = 0; i < this.size * this.size - 1; i++) {
-                    if (this.tiles[i] === i + 1) correctTiles++;
+            changeDifficulty() {
+                const newSize = parseInt(document.getElementById('difficultySelect').value);
+                this.size = newSize;
+                this.initGame();
+                this.updateLevelTitle();
+                this.render();
+                this.shufflePuzzle();
+            }
+
+            changeTheme(theme) {
+                this.theme = theme;
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.classList.remove('active');
+                });
+                document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
+                this.render();
+            }
+
+            playSound(type) {
+                if (!this.soundEnabled) return;
+                
+                // Create audio context for sound effects
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                switch (type) {
+                    case 'move':
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        break;
+                    case 'win':
+                        oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                        break;
+                    case 'hint':
+                        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        break;
+                    case 'undo':
+                        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        break;
                 }
                 
-                const progress = (correctTiles / (this.size * this.size - 1)) * 100;
-                document.getElementById('progressBar').style.width = progress + '%';
-            }
-
-            showWinModal() {
-                const modal = document.getElementById('winModal');
-                const finalTime = Math.floor((Date.now() - this.startTime) / 1000);
-                
-                document.getElementById('finalMoves').textContent = this.moves;
-                document.getElementById('finalTime').textContent = 
-                    Math.floor(finalTime / 60) + ':' + (finalTime % 60).toString().padStart(2, '0');
-                
-                modal.classList.add('show');
-            }
-
-            createParticles() {
-                const grid = document.getElementById('puzzleGrid');
-                for (let i = 0; i < 20; i++) {
-                    setTimeout(() => {
-                        const particle = document.createElement('div');
-                        particle.className = 'particle';
-                        particle.style.left = Math.random() * 100 + '%';
-                        particle.style.top = Math.random() * 100 + '%';
-                        particle.style.background = ['#0ea5e9', '#2563eb', '#3b82f6'][Math.floor(Math.random() * 3)];
-                        
-                        grid.appendChild(particle);
-                        
-                        setTimeout(() => particle.remove(), 1000);
-                    }, i * 50);
-                }
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
             }
         }
 
@@ -606,12 +995,11 @@
 
         // Initialize game when page loads
         window.onload = () => {
-            game = new SlidePuzzle();
+            game = new AdvancedSlidePuzzle();
         };
 
         // Global functions for UI
         function goBack() {
-            // For Telegram integration
             if (window.Telegram && window.Telegram.WebApp) {
                 window.Telegram.WebApp.close();
             } else {
@@ -631,21 +1019,66 @@
             game.getHint();
         }
 
+        function resetGame() {
+            if (confirm('Are you sure you want to reset the current game?')) {
+                game.shufflePuzzle();
+            }
+        }
+
         function nextLevel() {
             document.getElementById('winModal').classList.remove('show');
-            // In a full game, this would load the next level
-            game = new SlidePuzzle();
+            const currentSize = game.size;
+            if (currentSize < 6) {
+                game.size = currentSize + 1;
+                document.getElementById('difficultySelect').value = game.size;
+                game.initGame();
+                game.updateLevelTitle();
+                game.render();
+                game.shufflePuzzle();
+            } else {
+                game = new AdvancedSlidePuzzle();
+            }
         }
 
         function playAgain() {
             document.getElementById('winModal').classList.remove('show');
-            game = new SlidePuzzle();
+            game = new AdvancedSlidePuzzle();
+        }
+
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        function changeDifficulty() {
+            game.changeDifficulty();
+        }
+
+        function changeTheme(theme) {
+            game.changeTheme(theme);
+        }
+
+        function toggleSound() {
+            game.soundEnabled = document.getElementById('soundToggle').checked;
         }
 
         // Telegram WebApp integration
         if (window.Telegram && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
+            
+            // Set high score for Telegram leaderboard
+            window.Telegram.WebApp.onEvent('mainButtonClicked', () => {
+                const score = game.calculateScore(game.moves, Math.floor((Date.now() - game.startTime) / 1000));
+                window.Telegram.WebApp.sendData(JSON.stringify({
+                    score: score,
+                    moves: game.moves,
+                    difficulty: game.size
+                }));
+            });
         }
     </script>
 </body>
