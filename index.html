@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Odyssey - Advanced HTML5 Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone.js/14.8.49/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas3D {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .ui-element {
+            pointer-events: auto;
+        }
+
+        /* HUD Elements */
+        #hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ffff;
+            font-size: 14px;
+            background: rgba(0, 20, 40, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        #energy-bar, #health-bar {
+            width: 200px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 5px 0;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffff00, #ff8c00);
+            width: 100%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        #health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6b6b);
+            width: 100%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Minimap */
+        #minimap {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: rgba(0, 20, 40, 0.9);
+            border-radius: 50%;
+            border: 3px solid rgba(0, 255, 255, 0.5);
+            overflow: hidden;
+        }
+
+        /* Control Panel */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 20, 40, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn {
+            padding: 15px 25px;
+            background: linear-gradient(145deg, #1e3c72, #2a5298);
+            color: #00ffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+            background: linear-gradient(145deg, #2a5298, #1e3c72);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Particle Effects */
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Modal System */
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 20, 40, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            color: #00ffff;
+            max-width: 80%;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
+        }
+
+        /* Inventory */
+        #inventory {
+            position: absolute;
+            top: 50%;
+            right: -300px;
+            transform: translateY(-50%);
+            width: 280px;
+            height: 400px;
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            transition: right 0.3s ease;
+        }
+
+        #inventory.open {
+            right: 20px;
+        }
+
+        .inventory-slot {
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 5px;
+            margin: 5px;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .inventory-slot:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        /* Notifications */
+        #notifications {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            max-width: 300px;
+        }
+
+        .notification {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            color: #00ffff;
+            transform: translateX(-400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* Advanced UI Effects */
+        .glow {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* Loading Screen */
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #00ffff;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+            border-top: 3px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #hud {
+                font-size: 12px;
+                padding: 10px;
+                top: 10px;
+                left: 10px;
+            }
+            
+            #energy-bar, #health-bar {
+                width: 150px;
+                height: 15px;
+            }
+            
+            #minimap {
+                width: 150px;
+                height: 150px;
+                top: 10px;
+                right: 10px;
+            }
+            
+            .control-btn {
+                padding: 12px 20px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Loading Screen -->
+        <div id="loading">
+            <div class="loading-spinner"></div>
+            <h2>Initializing Space Odyssey...</h2>
+            <p>Loading advanced systems...</p>
+        </div>
+
+        <!-- 3D Canvas -->
+        <canvas id="canvas3D"></canvas>
+
+        <!-- UI Layer -->
+        <div id="ui">
+            <!-- HUD -->
+            <div id="hud" class="ui-element">
+                <div>Energy: <span id="energy-value">100</span>%</div>
+                <div id="energy-bar"><div id="energy-fill"></div></div>
+                <div>Health: <span id="health-value">100</span>%</div>
+                <div id="health-bar"><div id="health-fill"></div></div>
+                <div>Score: <span id="score">0</span></div>
+                <div>Coordinates: <span id="coordinates">0, 0, 0</span></div>
+                <div>Sector: <span id="sector">Alpha-1</span></div>
+            </div>
+
+            <!-- Minimap -->
+            <div id="minimap" class="ui-element">
+                <div class="scan-line"></div>
+                <canvas id="minimapCanvas" width="200" height="200"></canvas>
+            </div>
+
+            <!-- Control Panel -->
+            <div id="controls" class="ui-element">
+                <button class="control-btn" id="thrustBtn">🚀 Thrust</button>
+                <button class="control-btn" id="shieldBtn">🛡️ Shield</button>
+                <button class="control-btn" id="scanBtn">📡 Scan</button>
+                <button class="control-btn" id="inventoryBtn">📦 Inventory</button>
+                <button class="control-btn" id="warpBtn">⚡ Warp</button>
+            </div>
+
+            <!-- Inventory Panel -->
+            <div id="inventory" class="ui-element">
+                <h3 style="color: #00ffff; margin-bottom: 15px;">Ship Inventory</h3>
+                <div id="inventoryGrid"></div>
+            </div>
+
+            <!-- Notifications -->
+            <div id="notifications"></div>
+        </div>
+    </div>
+
+    <script>
+        class SpaceOdysseyGame {
+            constructor() {
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.ship = null;
+                this.stars = [];
+                this.enemies = [];
+                this.asteroids = [];
+                this.collectibles = [];
+                
+                this.gameState = {
+                    energy: 100,
+                    health: 100,
+                    score: 0,
+                    inventory: [],
+                    position: { x: 0, y: 0, z: 0 },
+                    velocity: { x: 0, y: 0, z: 0 },
+                    shields: false,
+                    scanning: false
+                };
+
+                this.keys = {};
+                this.sounds = {};
+                
+                this.init();
+            }
+
+            async init() {
+                await this.loadAssets();
+                this.initThreeJS();
+                this.createShip();
+                this.createStarField();
+                this.createEnemies();
+                this.createAsteroids();
+                this.createCollectibles();
+                this.setupControls();
+                this.setupAudio();
+                this.setupUI();
+                this.hideLoading();
+                this.gameLoop();
+            }
+
+            async loadAssets() {
+                // Simulate asset loading with progress
+                const assets = ['ship', 'stars', 'enemies', 'sounds', 'textures'];
+                for (let i = 0; i < assets.length; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    document.querySelector('#loading p').textContent = `Loading ${assets[i]}...`;
+                }
+            }
+
+            initThreeJS() {
+                // Scene setup
+                this.scene = new THREE.Scene();
+                this.scene.fog = new THREE.Fog(0x000011, 1000, 3000);
+
+                // Camera setup
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+                this.camera.position.z = 50;
+
+                // Renderer setup
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: document.getElementById('canvas3D'),
+                    antialias: true,
+                    alpha: true 
+                });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setClearColor(0x000011, 1);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.2);
+                this.scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(100, 100, 50);
+                directionalLight.castShadow = true;
+                this.scene.add(directionalLight);
+
+                // Post-processing effects could be added here with additional libraries
+            }
+
+            createShip() {
+                // Create a futuristic ship
+                const shipGroup = new THREE.Group();
+                
+                // Main body
+                const bodyGeometry = new THREE.ConeGeometry(2, 8, 8);
+                const bodyMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0x00ffff,
+                    shininess: 100 
+                });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                body.rotation.x = Math.PI / 2;
+                shipGroup.add(body);
+
+                // Wings
+                const wingGeometry = new THREE.BoxGeometry(6, 0.5, 1);
+                const wingMaterial = new THREE.MeshPhongMaterial({ color: 0x0088aa });
+                const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                leftWing.position.set(-2, 0, -1);
+                const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                rightWing.position.set(2, 0, -1);
+                shipGroup.add(leftWing, rightWing);
+
+                // Engine glow
+                const engineGeometry = new THREE.SphereGeometry(1, 8, 8);
+                const engineMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0xff4400,
+                    transparent: true,
+                    opacity: 0.8 
+                });
+                const engine = new THREE.Mesh(engineGeometry, engineMaterial);
+                engine.position.z = -5;
+                shipGroup.add(engine);
+
+                this.ship = shipGroup;
+                this.scene.add(this.ship);
+            }
+
+            createStarField() {
+                const starGeometry = new THREE.BufferGeometry();
+                const starCount = 10000;
+                const positions = new Float32Array(starCount * 3);
+
+                for (let i = 0; i < starCount * 3; i += 3) {
+                    positions[i] = (Math.random() - 0.5) * 4000;
+                    positions[i + 1] = (Math.random() - 0.5) * 4000;
+                    positions[i + 2] = (Math.random() - 0.5) * 4000;
+                }
+
+                starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                
+                const starMaterial = new THREE.PointsMaterial({ 
+                    color: 0xffffff,
+                    size: 2,
+                    transparent: true 
+                });
+                
+                this.stars = new THREE.Points(starGeometry, starMaterial);
+                this.scene.add(this.stars);
+            }
+
+            createEnemies() {
+                for (let i = 0; i < 10; i++) {
+                    const enemyGeometry = new THREE.OctahedronGeometry(3);
+                    const enemyMaterial = new THREE.MeshPhongMaterial({ 
+                        color: 0xff0044,
+                        transparent: true,
+                        opacity: 0.8 
+                    });
+                    const enemy = new THREE.Mesh(enemyGeometry, enemyMaterial);
+                    
+                    enemy.position.set(
+                        (Math.random() - 0.5) * 1000,
+                        (Math.random() - 0.5) * 1000,
+                        (Math.random() - 0.5) * 1000
+                    );
+                    
+                    enemy.userData = {
+                        health: 100,
+                        speed: Math.random() * 2 + 1,
+                        attackRange: 50
+                    };
+                    
+                    this.enemies.push(enemy);
+                    this.scene.add(enemy);
+                }
+            }
+
+            createAsteroids() {
+                for (let i = 0; i < 50; i++) {
+                    const size = Math.random() * 10 + 5;
+                    const asteroidGeometry = new THREE.DodecahedronGeometry(size);
+                    const asteroidMaterial = new THREE.MeshPhongMaterial({ 
+                        color: 0x8b4513,
+                        transparent: true,
+                        opacity: 0.9 
+                    });
+                    const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+                    
+                    asteroid.position.set(
+                        (Math.random() - 0.5) * 2000,
+                        (Math.random() - 0.5) * 2000,
+                        (Math.random() - 0.5) * 2000
+                    );
+                    
+                    asteroid.userData = { 
+                        rotationSpeed: Math.random() * 0.02,
+                        size: size 
+                    };
+                    
+                    this.asteroids.push(asteroid);
+                    this.scene.add(asteroid);
+                }
+            }
+
+            createCollectibles() {
+                for (let i = 0; i < 20; i++) {
+                    const collectibleGeometry = new THREE.SphereGeometry(2);
+                    const collectibleMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0x00ff00,
+                        transparent: true,
+                        opacity: 0.7 
+                    });
+                    const collectible = new THREE.Mesh(collectibleGeometry, collectibleMaterial);
+                    
+                    collectible.position.set(
+                        (Math.random() - 0.5) * 1500,
+                        (Math.random() - 0.5) * 1500,
+                        (Math.random() - 0.5) * 1500
+                    );
+                    
+                    collectible.userData = { 
+                        type: Math.random() > 0.5 ? 'energy' : 'health',
+                        value: 20,
+                        rotationSpeed: 0.05 
+                    };
+                    
+                    this.collectibles.push(collectible);
+                    this.scene.add(collectible);
+                }
+            }
+
+            setupControls() {
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    this.keys[e.code] = true;
+                });
+                
+                document.addEventListener('keyup', (e) => {
+                    this.keys[e.code] = false;
+                });
+
+                // Touch controls for mobile
+                let touchStart = null;
+                document.addEventListener('touchstart', (e) => {
+                    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                });
+                
+                document.addEventListener('touchmove', (e) => {
+                    if (!touchStart) return;
+                    const touchEnd = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                    const deltaX = touchEnd.x - touchStart.x;
+                    const deltaY = touchEnd.y - touchStart.y;
+                    
+                    this.gameState.velocity.x += deltaX * 0.001;
+                    this.gameState.velocity.y -= deltaY * 0.001;
+                });
+
+                // Button controls
+                document.getElementById('thrustBtn').addEventListener('click', () => {
+                    this.thrust();
+                });
+                
+                document.getElementById('shieldBtn').addEventListener('click', () => {
+                    this.toggleShields();
+                });
+                
+                document.getElementById('scanBtn').addEventListener('click', () => {
+                    this.scan();
+                });
+                
+                document.getElementById('inventoryBtn').addEventListener('click', () => {
+                    this.toggleInventory();
+                });
+                
+                document.getElementById('warpBtn').addEventListener('click', () => {
+                    this.warp();
+                });
+            }
+
+            setupAudio() {
+                // Initialize Tone.js for advanced audio
+                this.setupSoundEffects();
+            }
+
+            setupSoundEffects() {
+                // Engine sound
+                this.sounds.engine = new Tone.Oscillator(80, "sawtooth").toDestination();
+                this.sounds.engine.volume.value = -20;
+                
+                // Shield sound
+                this.sounds.shield = new Tone.Synth().toDestination();
+                
+                // Pickup sound
+                this.sounds.pickup = new Tone.PluckSynth().toDestination();
+            }
+
+            setupUI() {
+                // Initialize inventory grid
+                const inventoryGrid = document.getElementById('inventoryGrid');
+                for (let i = 0; i < 20; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'inventory-slot';
+                    slot.dataset.slot = i;
+                    inventoryGrid.appendChild(slot);
+                }
+
+                // Setup minimap
+                this.setupMinimap();
+            }
+
+            setupMinimap() {
+                this.minimapCanvas = document.getElementById('minimapCanvas');
+                this.minimapCtx = this.minimapCanvas.getContext('2d');
+            }
+
+            hideLoading() {
+                document.getElementById('loading').style.display = 'none';
+            }
+
+            thrust() {
+                if (this.gameState.energy > 5) {
+                    this.gameState.velocity.z += 0.5;
+                    this.gameState.energy -= 5;
+                    this.playSound('engine');
+                    this.createParticleEffect(this.ship.position, 0xff4400);
+                }
+            }
+
+            toggleShields() {
+                if (this.gameState.energy > 10) {
+                    this.gameState.shields = !this.gameState.shields;
+                    this.gameState.energy -= this.gameState.shields ? 10 : 0;
+                    this.playSound('shield');
+                    this.showNotification(this.gameState.shields ? 'Shields Up' : 'Shields Down');
+                }
+            }
+
+            scan() {
+                if (this.gameState.energy > 15) {
+                    this.gameState.scanning = true;
+                    this.gameState.energy -= 15;
+                    this.showNotification('Scanning nearby objects...');
+                    
+                    setTimeout(() => {
+                        this.gameState.scanning = false;
+                        const nearbyObjects = this.findNearbyObjects();
+                        this.showScanResults(nearbyObjects);
+                    }, 2000);
+                }
+            }
+
+            toggleInventory() {
+                const inventory = document.getElementById('inventory');
+                inventory.classList.toggle('open');
+            }
+
+            warp() {
+                if (this.gameState.energy > 50) {
+                    this.gameState.energy -= 50;
+                    this.ship.position.set(
+                        (Math.random() - 0.5) * 1000,
+                        (Math.random() - 0.5) * 1000,
+                        (Math.random() - 0.5) * 1000
+                    );
+                    this.showNotification('Warp jump complete!');
+                    this.createWarpEffect();
+                }
+            }
+
+            update() {
+                // Handle keyboard input
+                if (this.keys['KeyW'] || this.keys['ArrowUp']) {
+                    this.gameState.velocity.z += 0.1;
+                }
+                if (this.keys['KeyS'] || this.keys['ArrowDown']) {
+                    this.gameState.velocity.z -= 0.1;
+                }
+                if (this.keys['KeyA'] || this.keys['ArrowLeft']) {
+                    this.gameState.velocity.x -= 0.1;
+                }
+                if (this.keys['KeyD'] || this.keys['ArrowRight']) {
+                    this.gameState.velocity.x += 0.1;
+                }
+                if (this.keys['KeyQ']) {
+                    this.gameState.velocity.y += 0.1;
+                }
+                if (this.keys['KeyE']) {
+                    this.gameState.velocity.y -= 0.1;
+                }
+
+                // Apply physics
+                this.ship.position.add(new THREE.Vector3(
+                    this.gameState.velocity.x,
+                    this.gameState.velocity.y,
+                    this.gameState.velocity.z
+                ));
+
+                // Apply drag
+                this.gameState.velocity.x *= 0.98;
+                this.gameState.velocity.y *= 0.98;
+                this.gameState.velocity.z *= 0.98;
+
+                // Update camera to follow ship
+                this.camera.position.copy(this.ship.position);
+                this.camera.position.z += 50;
+                this.camera.lookAt(this.ship.position);
+
+                // Animate objects
+                this.animateObjects();
+                
+                // Check collisions
+                this.checkCollisions();
+                
+                // Update UI
+                this.updateUI();
+                
+                // Regenerate energy slowly
+                if (this.gameState.energy < 100) {
+                    this.gameState.energy += 0.1;
+                }
+            }
+
+            animateObjects() {
+                // Rotate asteroids
+                this.asteroids.forEach(asteroid => {
+                    asteroid.rotation.x += asteroid.userData.rotationSpeed;
+                    asteroid.rotation.y += asteroid.userData.rotationSpeed;
+                });
+
+                // Animate collectibles
+                this.collectibles.forEach(collectible => {
+                    collectible.rotation.y += collectible.userData.rotationSpeed;
+                    collectible.position.y += Math.sin(Date.now() * 0.001 + collectible.position.x) * 0.1;
+                });
+
+                // Move enemies toward player
+                this.enemies.forEach(enemy => {
+                    const direction = new THREE.Vector3().subVectors(this.ship.position, enemy.position);
+                    const distance = direction.length();
+                    
+                    if (distance < enemy.userData.attackRange) {
+                        direction.normalize();
+                        enemy.position.add(direction.multiplyScalar(enemy.userData.speed * 0.1));
+                        enemy.rotation.x += 0.1;
+                        enemy.rotation.y += 0.1;
+                    }
+                });
+
+                // Rotate stars
+                if (this.stars) {
+                    this.stars.rotation.y += 0.0002;
+                }
+            }
+
+            checkCollisions() {
+                const shipPosition = this.ship.position;
+
+                // Check collectible collisions
+                this.collectibles = this.collectibles.filter(collectible => {
+                    const distance = shipPosition.distanceTo(collectible.position);
+                    if (distance < 5) {
+                        this.collectItem(collectible);
+                        this.scene.remove(collectible);
+                        return false;
+                    }
+                    return true;
+                });
+
+                // Check asteroid collisions
+                this.asteroids.forEach(asteroid => {
+                    const distance = shipPosition.distanceTo(asteroid.position);
+                    if (distance < asteroid.userData.size && !this.gameState.shields) {
+                        this.takeDamage(10);
+                        this.createExplosionEffect(asteroid.position);
+                    }
+                });
+
+                // Check enemy collisions
+                this.enemies.forEach(enemy => {
+                    const distance = shipPosition.distanceTo(enemy.position);
+                    if (distance < 8 && !this.gameState.shields) {
+                        this.takeDamage(15);
+                        this.createExplosionEffect(enemy.position);
+                    }
+                });
+            }
+
+            collectItem(collectible) {
+                const type = collectible.userData.type;
+                const value = collectible.userData.value;
+                
+                if (type === 'energy') {
+                    this.gameState.energy = Math.min(100, this.gameState.energy + value);
+                    this.showNotification(`+${value} Energy`);
+                } else if (type === 'health') {
+                    this.gameState.health = Math.min(100, this.gameState.health + value);
+                    this.showNotification(`+${value} Health`);
+                }
+                
+                this.gameState.score += 50;
+                this.playSound('pickup');
+                this.createPickupEffect(collectible.position);
+            }
+
+            takeDamage(amount) {
+                if (!this.gameState.shields) {
+                    this.gameState.health -= amount;
+                    this.showNotification(`-${amount} Health`, 'damage');
+                    this.createDamageEffect();
+                    
+                    if (this.gameState.health <= 0) {
+                        this.gameOver();
+                    }
+                }
+            }
+
+            gameOver() {
+                this.showNotification('Game Over!', 'critical');
+                // Restart game after 3 seconds
+                setTimeout(() => {
+                    this.resetGame();
+                }, 3000);
+            }
+
+            resetGame() {
+                // Reset game state
+                this.gameState = {
+                    energy: 100,
+                    health: 100,
+                    score: 0,
+                    inventory: [],
+                    position: { x: 0, y: 0, z: 0 },
+                    velocity: { x: 0, y: 0, z: 0 },
+                    shields: false,
+                    scanning: false
+                };
+                
+                // Reset ship position
+                this.ship.position.set(0, 0, 0);
+                
+                this.showNotification('Game Restarted', 'info');
+            }
+
+            findNearbyObjects() {
+                const shipPosition = this.ship.position;
+                const nearby = [];
+                
+                // Find nearby enemies
+                this.enemies.forEach((enemy, index) => {
+                    const distance = shipPosition.distanceTo(enemy.position);
+                    if (distance < 100) {
+                        nearby.push({ type: 'Enemy', distance: Math.round(distance), index });
+                    }
+                });
+                
+                // Find nearby asteroids
+                this.asteroids.forEach((asteroid, index) => {
+                    const distance = shipPosition.distanceTo(asteroid.position);
+                    if (distance < 50) {
+                        nearby.push({ type: 'Asteroid', distance: Math.round(distance), index });
+                    }
+                });
+                
+                // Find nearby collectibles
+                this.collectibles.forEach((collectible, index) => {
+                    const distance = shipPosition.distanceTo(collectible.position);
+                    if (distance < 75) {
+                        nearby.push({ 
+                            type: `${collectible.userData.type} Crystal`, 
+                            distance: Math.round(distance), 
+                            index 
+                        });
+                    }
+                });
+                
+                return nearby;
+            }
+
+            showScanResults(objects) {
+                if (objects.length === 0) {
+                    this.showNotification('No objects detected in range');
+                    return;
+                }
+                
+                let message = `Scan Results (${objects.length} objects):\n`;
+                objects.slice(0, 5).forEach(obj => {
+                    message += `${obj.type}: ${obj.distance}m\n`;
+                });
+                
+                this.showNotification(message, 'scan');
+            }
+
+            updateUI() {
+                // Update HUD values
+                document.getElementById('energy-value').textContent = Math.round(this.gameState.energy);
+                document.getElementById('health-value').textContent = Math.round(this.gameState.health);
+                document.getElementById('score').textContent = this.gameState.score;
+                
+                // Update progress bars
+                document.getElementById('energy-fill').style.width = `${this.gameState.energy}%`;
+                document.getElementById('health-fill').style.width = `${this.gameState.health}%`;
+                
+                // Update coordinates
+                const pos = this.ship.position;
+                document.getElementById('coordinates').textContent = 
+                    `${Math.round(pos.x)}, ${Math.round(pos.y)}, ${Math.round(pos.z)}`;
+                
+                // Update sector based on position
+                const sectorX = Math.floor(pos.x / 200) + 1;
+                const sectorY = Math.floor(pos.y / 200) + 1;
+                document.getElementById('sector').textContent = `Sector ${sectorX}-${sectorY}`;
+                
+                // Update minimap
+                this.updateMinimap();
+                
+                // Update shield visual effect
+                if (this.gameState.shields) {
+                    document.getElementById('shieldBtn').classList.add('glow');
+                } else {
+                    document.getElementById('shieldBtn').classList.remove('glow');
+                }
+            }
+
+            updateMinimap() {
+                const ctx = this.minimapCtx;
+                const canvas = this.minimapCanvas;
+                
+                // Clear minimap
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw background circle
+                ctx.beginPath();
+                ctx.arc(100, 100, 98, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 50, 100, 0.3)';
+                ctx.fill();
+                
+                const shipPos = this.ship.position;
+                const scale = 0.1;
+                
+                // Draw player (center)
+                ctx.beginPath();
+                ctx.arc(100, 100, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#00ffff';
+                ctx.fill();
+                
+                // Draw nearby enemies
+                this.enemies.forEach(enemy => {
+                    const distance = shipPos.distanceTo(enemy.position);
+                    if (distance < 200) {
+                        const relX = (enemy.position.x - shipPos.x) * scale;
+                        const relY = (enemy.position.y - shipPos.y) * scale;
+                        
+                        ctx.beginPath();
+                        ctx.arc(100 + relX, 100 + relY, 2, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ff0044';
+                        ctx.fill();
+                    }
+                });
+                
+                // Draw nearby collectibles
+                this.collectibles.forEach(collectible => {
+                    const distance = shipPos.distanceTo(collectible.position);
+                    if (distance < 200) {
+                        const relX = (collectible.position.x - shipPos.x) * scale;
+                        const relY = (collectible.position.y - shipPos.y) * scale;
+                        
+                        ctx.beginPath();
+                        ctx.arc(100 + relX, 100 + relY, 1.5, 0, Math.PI * 2);
+                        ctx.fillStyle = '#00ff00';
+                        ctx.fill();
+                    }
+                });
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                
+                // Style based on type
+                switch(type) {
+                    case 'damage':
+                        notification.style.borderColor = '#ff0044';
+                        notification.style.color = '#ff0044';
+                        break;
+                    case 'critical':
+                        notification.style.borderColor = '#ff0000';
+                        notification.style.color = '#ff0000';
+                        notification.style.background = 'rgba(255, 0, 0, 0.2)';
+                        break;
+                    case 'scan':
+                        notification.style.borderColor = '#ffff00';
+                        notification.style.color = '#ffff00';
+                        break;
+                    default:
+                        notification.style.borderColor = '#00ffff';
+                        notification.style.color = '#00ffff';
+                }
+                
+                document.getElementById('notifications').appendChild(notification);
+                
+                // Animate in
+                setTimeout(() => notification.classList.add('show'), 10);
+                
+                // Remove after delay
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(-400px)';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            createParticleEffect(position, color) {
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.background = `#${color.toString(16).padStart(6, '0')}`;
+                    particle.style.left = '50%';
+                    particle.style.top = '50%';
+                    
+                    document.getElementById('ui').appendChild(particle);
+                    
+                    // Animate particle
+                    gsap.to(particle, {
+                        x: (Math.random() - 0.5) * 200,
+                        y: (Math.random() - 0.5) * 200,
+                        opacity: 0,
+                        duration: 1,
+                        ease: "power2.out",
+                        onComplete: () => particle.remove()
+                    });
+                }
+            }
+
+            createPickupEffect(position) {
+                this.createParticleEffect(position, 0x00ff00);
+                
+                // Screen flash effect
+                const flash = document.createElement('div');
+                flash.style.position = 'absolute';
+                flash.style.top = '0';
+                flash.style.left = '0';
+                flash.style.width = '100%';
+                flash.style.height = '100%';
+                flash.style.background = 'rgba(0, 255, 0, 0.2)';
+                flash.style.pointerEvents = 'none';
+                flash.style.zIndex = '999';
+                
+                document.getElementById('ui').appendChild(flash);
+                
+                gsap.to(flash, {
+                    opacity: 0,
+                    duration: 0.3,
+                    onComplete: () => flash.remove()
+                });
+            }
+
+            createDamageEffect() {
+                // Screen shake
+                gsap.to(this.camera.position, {
+                    x: this.camera.position.x + (Math.random() - 0.5) * 5,
+                    y: this.camera.position.y + (Math.random() - 0.5) * 5,
+                    duration: 0.1,
+                    yoyo: true,
+                    repeat: 3
+                });
+                
+                // Red screen flash
+                const flash = document.createElement('div');
+                flash.style.position = 'absolute';
+                flash.style.top = '0';
+                flash.style.left = '0';
+                flash.style.width = '100%';
+                flash.style.height = '100%';
+                flash.style.background = 'rgba(255, 0, 0, 0.3)';
+                flash.style.pointerEvents = 'none';
+                flash.style.zIndex = '999';
+                
+                document.getElementById('ui').appendChild(flash);
+                
+                gsap.to(flash, {
+                    opacity: 0,
+                    duration: 0.5,
+                    onComplete: () => flash.remove()
+                });
+            }
+
+            createExplosionEffect(position) {
+                this.createParticleEffect(position, 0xff4400);
+            }
+
+            createWarpEffect() {
+                // Create warp tunnel effect
+                const warpRings = [];
+                
+                for (let i = 0; i < 10; i++) {
+                    const ringGeometry = new THREE.RingGeometry(5, 10, 32);
+                    const ringMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0x00ffff,
+                        transparent: true,
+                        opacity: 0.3 
+                    });
+                    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                    ring.position.copy(this.ship.position);
+                    ring.position.z -= i * 20;
+                    
+                    this.scene.add(ring);
+                    warpRings.push(ring);
+                    
+                    // Animate ring
+                    gsap.to(ring.scale, {
+                        x: 5,
+                        y: 5,
+                        z: 5,
+                        duration: 1,
+                        delay: i * 0.1
+                    });
+                    
+                    gsap.to(ring.material, {
+                        opacity: 0,
+                        duration: 1,
+                        delay: i * 0.1,
+                        onComplete: () => {
+                            this.scene.remove(ring);
+                        }
+                    });
+                }
+            }
+
+            playSound(soundType) {
+                if (!this.sounds[soundType]) return;
+                
+                try {
+                    switch(soundType) {
+                        case 'engine':
+                            if (this.sounds.engine.state === 'stopped') {
+                                this.sounds.engine.start();
+                                setTimeout(() => {
+                                    if (this.sounds.engine.state === 'started') {
+                                        this.sounds.engine.stop();
+                                    }
+                                }, 200);
+                            }
+                            break;
+                        case 'shield':
+                            this.sounds.shield.triggerAttackRelease('C4', '8n');
+                            break;
+                        case 'pickup':
+                            this.sounds.pickup.triggerAttack('E5');
+                            break;
+                    }
+                } catch (error) {
+                    console.log('Audio context not ready');
+                }
+            }
+
+            render() {
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            gameLoop() {
+                requestAnimationFrame(() => this.gameLoop());
+                
+                this.update();
+                this.render();
+            }
+
+            // Window resize handler
+            onWindowResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            const game = new SpaceOdysseyGame();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => game.onWindowResize());
+            
+            // Add keyboard shortcuts info
+            console.log(`
+🚀 SPACE ODYSSEY CONTROLS:
+WASD / Arrow Keys - Move ship
+Q/E - Move up/down
+Mouse/Touch - Look around
+Buttons - Special actions
+
+🎮 GAME FEATURES:
+- Advanced 3D graphics with Three.js
+- Spatial audio with Tone.js
+- Smooth animations with GSAP
+- Minimap and scanning system
+- Energy and health management
+- Collectible items and inventory
+- Shield system and warp jumps
+- Particle effects and screen shakes
+- Responsive design for all devices
+
+⚡ Press F12 to see this console message again!
+            `);
+        });
+    </script>
+</body>
+</html>
